@@ -16,22 +16,20 @@ iarduino_RTC time(RTC_DS1302, DS_RST, DS_CLK, DS_DAT);
 EButton bt(BUTT_PIN,11);
 //По умолчанию свет отключен
 bool lightFlag = false;
-//Массив периодов включения в сек: вкл, выкл, кроме день недели
-long lightOnRange[2][2] = {{21600L,28800L},{64800L, 79200L}};
 //Время свечения от кнопки в мин
 const long BT_LIGHT_ON_MIN = 15;
 long lightTime = 0;
 long currentTime = 0;
 int dayOfWeek = 8;
 
-class lp 
+class lightPeriodByWeekDays 
 {
   private:
     long _lightSt;
     long _lightEnd;
     bool _dayOn[7];
   public: 
-    lp (long lightSt = 0,long lightEnd = 0)
+    lightPeriodByWeekDays (long lightSt = 0,long lightEnd = 0)
     {
       _lightSt = lightSt;
       _lightEnd = lightEnd;
@@ -47,13 +45,9 @@ class lp
       _dayOn[5]=Fri;
       _dayOn[6]=Sat;    
     };
-    bool on(long sec, int d)
+    void view ()
     {
-      bool inRange = sec > _lightSt && sec < _lightEnd && _dayOn[d];
-      Serial.println("Вот эта пижда");
-      
-      Serial.println(d);
-      
+      Serial.println("День недели");        
       Serial.println(_dayOn[0]);          
       Serial.println(_dayOn[1]);  
       Serial.println(_dayOn[2]);  
@@ -61,15 +55,20 @@ class lp
       Serial.println(_dayOn[4]); 
       Serial.println(_dayOn[5]); 
       Serial.println(_dayOn[6]); 
-
-      Serial.println("Вот эта пижда");    
-          
+      Serial.println("Конец");
+    }
+    bool on(long sec, int d)
+    {
+      bool inRange = sec > _lightSt && sec < _lightEnd && _dayOn[d];
+      //Необходимо для отладки
+      //view();       
       return   inRange;
     }
+    
 };
 
-  lp e=lp(64800L, 79200L);
-  lp tm[2]={lp(21600L,28800L),e};
+  lightPeriodByWeekDays e=lightPeriodByWeekDays(64800L, 82800L);
+  lightPeriodByWeekDays tm[2]={lightPeriodByWeekDays(21600L,28800L),e};
   
   
 void setup()
@@ -84,23 +83,13 @@ void setup()
   time.begin();
   Serial.begin(9600);   
   //Установка времени
-  //time.settime(10,51,14,8,12,19,7);     // сек, мин, час, день, месяц, год, день недели
-  e.setDays(false,false,true,false,false,true,false);
-  tm[1]=e;
+  //time.settime(10,28,19,11,1,20,6);     // сек, мин, час, день, месяц, год, день недели
+  //e.setDays(false,false,true,false,false,true,false);
+  //tm[1]=e;
 }
 
 void loop()
-{
-  for(int i=0; i<2; i++)
-    {
-      Serial.print("<Object ");
-      Serial.print(i);
-      Serial.print(" ");
-      Serial.print(tm[i].on(currentTime,dayOfWeek));
-      Serial.print(" /Object>");
-      Serial.println( );
-    }
-  
+{ 
   Serial.println(time.gettime("w - H:i:s"));   // выводим время
   
   currentTime = (long)(time.seconds + time.minutes * 60L + time.hours * 3600L);
@@ -111,7 +100,7 @@ void loop()
     currentTime += 43200L;
 
   if (currentTime == 0L)
-    lightTime = 0L;
+    lightTime -= 86400L;
     
   Serial.println(currentTime);
   Serial.println(dayOfWeek);
@@ -121,7 +110,6 @@ void loop()
     digitalWrite(LED_PIN, HIGH);
     lightTime = currentTime + (BT_LIGHT_ON_MIN * 60L);
     Serial.println("BT_LIGHT_ON");
-    delay(1000);
     digitalWrite(LED_PIN, LOW);
   }
   
@@ -135,17 +123,8 @@ void loop()
   {
     lightTime=0;
     for(int i=0; i<2; i++)
-    {
-      Serial.print("<Элемент ");
-      Serial.print(i);
-      Serial.print(" ");
-      Serial.print(lightOnRange[i][0]);
-      Serial.print(" ");
-      Serial.print(lightOnRange[i][1]);
-      Serial.print(" /Элемент>");
-      Serial.println( );
-            
-      if(currentTime > lightOnRange[i][0] && currentTime < lightOnRange[i][1])
+    {            
+      if(tm[i].on(currentTime,dayOfWeek))
       {
         lightFlag=true;
         break;
