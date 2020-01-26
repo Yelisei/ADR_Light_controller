@@ -19,8 +19,10 @@ bool lightFlag = false;
 //Время свечения от кнопки в мин
 const long BT_LIGHT_ON_MIN = 15;
 long lightTime = 0;
+//Текущее время в сек
 long currentTime = 0;
-int dayOfWeek = 8;
+//Текущий день недели
+int dayOfWeek = 0;
 
 class lightPeriodByWeekDays 
 {
@@ -33,9 +35,9 @@ class lightPeriodByWeekDays
     {
       _lightSt = lightSt;
       _lightEnd = lightEnd;
-      setDays();
+      SetDays();
     };
-    void setDays(bool Mon=true, bool Tue=true, bool Wed=true, bool Thu=true, bool Fri=true, bool Sat=true, bool Sun=false) 
+    void SetDays(bool Mon=true, bool Tue=true, bool Wed=true, bool Thu=true, bool Fri=true, bool Sat=true, bool Sun=false) 
     {
       _dayOn[0]=Sun;
       _dayOn[1]=Mon;
@@ -45,7 +47,7 @@ class lightPeriodByWeekDays
       _dayOn[5]=Fri;
       _dayOn[6]=Sat;    
     };
-    void view ()
+    void View ()
     {
       Serial.println("День недели");        
       Serial.println(_dayOn[0]);          
@@ -57,18 +59,17 @@ class lightPeriodByWeekDays
       Serial.println(_dayOn[6]); 
       Serial.println("Конец");
     }
-    bool on(long sec, int d)
+    bool LightON(long sec, int d)
     {
       bool inRange = sec > _lightSt && sec < _lightEnd && _dayOn[d];
       //Необходимо для отладки
-      //view();       
+      //View();       
       return   inRange;
     }
-    
 };
 
-  lightPeriodByWeekDays e=lightPeriodByWeekDays(64800L, 82800L);
-  lightPeriodByWeekDays tm[2]={lightPeriodByWeekDays(21600L,28800L),e};
+  lightPeriodByWeekDays e=lightPeriodByWeekDays(70200L, 82800L);
+  lightPeriodByWeekDays tm[2]={lightPeriodByWeekDays(21600L,25200L),e};
   
   
 void setup()
@@ -84,7 +85,7 @@ void setup()
   Serial.begin(9600);   
   //Установка времени
   //time.settime(10,28,19,11,1,20,6);     // сек, мин, час, день, месяц, год, день недели
-  //e.setDays(false,false,true,false,false,true,false);
+  //e.SetDays(false,false,true,false,false,true,false);
   //tm[1]=e;
 }
 
@@ -124,7 +125,7 @@ void loop()
     lightTime=0;
     for(int i=0; i<2; i++)
     {            
-      if(tm[i].on(currentTime,dayOfWeek))
+      if(tm[i].LightON(currentTime,dayOfWeek))
       {
         lightFlag=true;
         break;
