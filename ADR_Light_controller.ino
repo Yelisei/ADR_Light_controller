@@ -35,9 +35,15 @@ class lightPeriodByWeekDays
     {
       _lightSt = lightSt;
       _lightEnd = lightEnd;
-      SetDays();
+      SetCustomDays();
     };
-    void SetDays(bool Mon=true, bool Tue=true, bool Wed=true, bool Thu=true, bool Fri=true, bool Sat=true, bool Sun=false) 
+    lightPeriodByWeekDays (long lightSt,long lightEnd, bool setAllDays)
+    {
+      _lightSt = lightSt;
+      _lightEnd = lightEnd;
+      SetAllDays();
+    };
+    void SetCustomDays(bool Mon=true, bool Tue=true, bool Wed=true, bool Thu=true, bool Fri=true, bool Sat=true, bool Sun=false) 
     {
       _dayOn[0]=Sun;
       _dayOn[1]=Mon;
@@ -47,6 +53,10 @@ class lightPeriodByWeekDays
       _dayOn[5]=Fri;
       _dayOn[6]=Sat;    
     };
+    void SetAllDays()
+    {
+      for(int i=0;i<7;i++){_dayOn[i]=true;}
+    }
     void View ()
     {
       Serial.println("День недели");        
@@ -67,9 +77,8 @@ class lightPeriodByWeekDays
       return   inRange;
     }
 };
-
-  lightPeriodByWeekDays e=lightPeriodByWeekDays(70200L, 82800L);
-  lightPeriodByWeekDays tm[2]={lightPeriodByWeekDays(21600L,25200L),e};
+//Массив периодов
+lightPeriodByWeekDays tm[2] = {lightPeriodByWeekDays(21600L,25200L),lightPeriodByWeekDays(70200L, 82800L, true)};
   
   
 void setup()
@@ -84,17 +93,13 @@ void setup()
   time.begin();
   Serial.begin(9600);   
   //Установка времени
-  //time.settime(10,28,19,11,1,20,6);     // сек, мин, час, день, месяц, год, день недели
-  //e.SetDays(false,false,true,false,false,true,false);
-  //tm[1]=e;
+  //time.settime(10,10,19,26,1,20,6);     // сек, мин, час, день, месяц, год, день недели
 }
 
 void loop()
 { 
-  Serial.println(time.gettime("w - H:i:s"));   // выводим время
-  
+  Serial.println(time.gettime("w - H:i:s"));   // выводим время 
   currentTime = (long)(time.seconds + time.minutes * 60L + time.hours * 3600L);
-
   dayOfWeek = (int)(time.weekday);
 
   if (time.midday == 1)
