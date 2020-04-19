@@ -1,17 +1,13 @@
 #include <EButton.h>
 #include <iarduino_RTC.h>
 
-//Определяем пины подключения модуля DS1302 к плате Arduino
-#define DS_DAT 7
-#define DS_CLK 6
-#define DS_RST 8
 //Определяем пин управления реле
 #define TL_SIG 11
 //Определяем пин кнопки
 #define BUTT_PIN 2
 #define LED_PIN 13
 //Создаём объект time класса iarduino_RTC с указанием пинов подключения
-iarduino_RTC time(RTC_DS1302, DS_RST, DS_CLK, DS_DAT);
+iarduino_RTC time(RTC_DS1307);
 //Создаём объект bt класса EButton кол-во повторений 11 (для устранения дребезга контактов)
 EButton bt(BUTT_PIN,11);
 //По умолчанию свет отключен
@@ -78,8 +74,7 @@ class lightPeriodByWeekDays
     }
 };
 //Массив периодов
-lightPeriodByWeekDays tm[2] = {lightPeriodByWeekDays(21600L,25200L),lightPeriodByWeekDays(70200L, 82800L, true)};
-  
+lightPeriodByWeekDays tm[2] = {lightPeriodByWeekDays(21600L,22500L),lightPeriodByWeekDays(75600L, 82800L, true)};
   
 void setup()
 {
@@ -93,7 +88,7 @@ void setup()
   time.begin();
   Serial.begin(9600);   
   //Установка времени
-  //time.settime(10,10,19,26,1,20,6);     // сек, мин, час, день, месяц, год, день недели
+  //time.settime(10,50,14,19,4,20,0);     // сек, мин, час, день, месяц, год, день недели
 }
 
 void loop()
