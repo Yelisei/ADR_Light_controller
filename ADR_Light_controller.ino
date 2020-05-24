@@ -1,4 +1,4 @@
-#include <EButton.h>
+ #include <EButton.h>
 #include <iarduino_RTC.h>
 
 //Определяем пин управления реле
@@ -74,7 +74,7 @@ class lightPeriodByWeekDays
     }
 };
 //Массив периодов
-lightPeriodByWeekDays tm[2] = {lightPeriodByWeekDays(21600L,22500L),lightPeriodByWeekDays(75600L, 82800L, true)};
+lightPeriodByWeekDays tm[2] = {lightPeriodByWeekDays(21600L,21600L),lightPeriodByWeekDays(82200L, 83000L, true)};
   
 void setup()
 {
@@ -88,21 +88,21 @@ void setup()
   time.begin();
   Serial.begin(9600);   
   //Установка времени
-  //time.settime(10,50,14,19,4,20,0);     // сек, мин, час, день, месяц, год, день недели
+  //time.settime(10,37,13,18,5,24,0);     // сек, мин, час, день, месяц, год, день недели
+  dayOfWeek = (int)(time.weekday);
 }
 
 void loop()
 { 
   Serial.println(time.gettime("w - H:i:s"));   // выводим время 
   currentTime = (long)(time.seconds + time.minutes * 60L + time.hours * 3600L);
-  dayOfWeek = (int)(time.weekday);
 
-  if (time.midday == 1)
-    currentTime += 43200L;
-
-  if (currentTime == 0L)
+  if (dayOfWeek != (int)(time.weekday))
+  {
     lightTime -= 86400L;
-    
+    dayOfWeek = (int)(time.weekday);
+  }
+  
   Serial.println(currentTime);
   Serial.println(dayOfWeek);
   
@@ -137,6 +137,7 @@ void loop()
     }
   }
   turnLight(lightFlag);
+  delay(100);
 }
 
 void turnLight(bool lightOnFlag){
